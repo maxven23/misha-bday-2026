@@ -21,17 +21,3 @@ go build -o birthday .
 ```bash
 go build .
 ```
-
-## CI/CD
-
-Пайплайн в `.gitlab-ci.yml`:
-- `lint` — `go vet` + golangci-lint
-- `build` — кросс-компиляция под linux/darwin/windows × amd64/arm64
-- `release` — загрузка бинарей в Package Registry + создание Release (только по тегу)
-
-Создать релиз:
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
