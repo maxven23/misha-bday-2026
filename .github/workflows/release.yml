@@ -1,0 +1,95 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}/${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: linux
+            arch: amd64
+            ext: ""
+          - os: linux
+            arch: arm64
+            ext: ""
+          - os: darwin
+            arch: amd64
+            ext: ""
+          - os: darwin
+            arch: arm64
+            ext: ""
+          - os: windows
+            arch: amd64
+            ext: ".exe"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.os }}
+          GOARCH: ${{ matrix.arch }}
+        run: |
+          go build -ldflags="-s -w" -o birthday_${{ matrix.os }}_${{ matrix.arch }}${{ matrix.ext }} .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: birthday_${{ matrix.os }}_${{ matrix.arch }}
+          path: birthday_${{ matrix.os }}_${{ matrix.arch }}${{ matrix.ext }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "🎂 ${{ github.ref_name }} — С днём рождения, Миша!"
+          body: |
+            ## 🎉 Happy Birthday, Михаил Коньков!
+
+            Техлид, DevOps-маг, CI/CD-мастер в оранжевых очках.
+
+            ### Скачать и запустить
+
+            | Платформа | Архитектура | Файл |
+            |---|---|---|
+            | Linux   | amd64       | `birthday_linux_amd64` |
+            | Linux   | arm64       | `birthday_linux_arm64` |
+            | macOS   | amd64       | `birthday_darwin_amd64` |
+            | macOS   | arm64 (M1+) | `birthday_darwin_arm64` |
+            | Windows | amd64       | `birthday_windows_amd64.exe` |
+
+            ```bash
+            # Linux / macOS
+            chmod +x birthday_linux_amd64
+            ./birthday_linux_amd64
+
+            # Windows
+            .\birthday_windows_amd64.exe
+            ```
+
+            > Управление: `←/→` или `A/D` — листать · `Space` — лайк/фейерверк · `Enter` — дальше · `q` — выйти
+          files: |
+            birthday_linux_amd64
+            birthday_linux_arm64
+            birthday_darwin_amd64
+            birthday_darwin_arm64
+            birthday_windows_amd64.exe
