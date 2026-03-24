@@ -5,7 +5,7 @@
 ## Запуск
 
 ```bash
-# Скачать из GitLab Releases и запустить
+# Скачать из Github Releases и запустить
 chmod +x birthday_linux_amd64
 ./birthday_linux_amd64
 
